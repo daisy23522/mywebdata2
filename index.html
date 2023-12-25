@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>172.22.4.2255</title>
+</head>
+<body>
+
+    <pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+#set2
+#WAR day 300
+# Install and load necessary packages
+install.packages("ggplot2")
+library(ggplot2)
+# Load your dataset
+data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\russia_losses_equipment.csv")
+# Check the structure of your dataset
+str(data)
+head(data)
+summary(data)
+barplot(data$aircraft,col="Red",main = "aircraft")
+hist(data$naval.ship,col = "orange")
+ggplot(data, aes(x = tank)) +
+  geom_histogram(fill = "skyblue", color = "blue", bins = 30) +
+  theme_minimal() +
+  labs(title = "Distribution of Tank Losses", x = "Number of Losses", y = "Frequency")
+
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(randomForest)
+
+# Select relevant columns for modeling
+data_for_modeling <- data[, c("helicopter", "tank", "APC")]
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(data_for_modeling$helicopter, p = 0.8, list = FALSE)
+train_data <- data_for_modeling[train_indices, ]
+test_data <- data_for_modeling[-train_indices, ]
+
+# Fit a linear regression model (you can choose a different model based on your needs)
+model <- lm(helicopter ~ ., data = train_data)
+
+# Make predictions on the test set
+predictions <- predict(model, newdata = test_data)
+
+# Evaluate the model (you may want to use a different evaluation metric)
+mse <- mean((test_data$helicopter - predictions)^2)
+cat("Mean Squared Error:", mse, "\n")
+
+######################################################################################
+#wholesale customer dataset
+# Assuming your dataset is named 'wholesale_data'
+# Load necessary libraries
+library(tidyverse)
+
+# Load the data
+# Assuming 'wholesale_data.csv' is the file containing your data
+wholesale_data <- read.csv("wholesale_data.csv")
+
+# Display the first few rows of the dataset
+head(wholesale_data)
+
+# Display the correlation matrix
+cor_matrix <- cor(wholesale_data[, c("FRESH", "MILK", "GROCERY", "FROZEN", "DETERGENTS_PAPER", "DELICATESSEN")])
+print("Correlation Matrix:")
+print(cor_matrix)
+
+# Visualize the correlation using a heatmap
+heatmap(cor_matrix, annot = TRUE)
+
+# Extract relevant columns for clustering
+clustering_data <- wholesale_data[, c("FRESH", "FROZEN")]
+
+# Normalize the data for clustering (optional but often recommended)
+scaled_data <- scale(clustering_data)
+
+# Perform clustering using k-means
+# Assuming you want to create 3 clusters (you can adjust this based on your needs)
+num_clusters <- 3
+kmeans_result <- kmeans(scaled_data, centers = num_clusters)
+
+# Add cluster labels to the original dataset
+wholesale_data$cluster <- as.factor(kmeans_result$cluster)
+
+# Display the cluster sizes
+table(wholesale_data$cluster)
+
+# Visualize the clusters (you can choose different variables for better visualization)
+plot(wholesale_data$FRESH, wholesale_data$MILK, col = wholesale_data$cluster, pch = 16, main = "Clusters of Wholesale Customers", xlab = "Fresh", ylab = "Milk")
+
+#drug data set
+# Assuming your dataset is named 'drug_data'
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(randomForest)
+library(e1071)  # for SVM
+library(class)   # for k-Nearest Neighbors
+
+# Load the data
+# Assuming 'drug_data.csv' is the file containing your data
+drug_data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\drug200.csv")
+
+# Display the first few rows of the dataset
+head(drug_data)
+
+# Summary statistics
+summary(drug_data)
+
+# Visualize the distribution of the target variable 'Drug'
+ggplot(drug_data, aes(x = Drug, fill = Drug)) +
+  geom_bar() +
+  labs(title = "Distribution of Drug Types")
+
+# Visualize relationships between variables
+# For example, Age vs. Na_to_K
+ggplot(drug_data, aes(x = Age, y = Na_to_K, color = Drug)) +
+  geom_point() +
+  labs(title = "Age vs. Na_to_K by Drug Type")
+
+# Encode categorical variables
+drug_data_encoded <- drug_data %>%
+  mutate(Sex = as.factor(Sex),
+         BP = as.factor(BP),
+         Cholesterol = as.factor(Cholesterol),
+         Drug = as.factor(Drug))
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(drug_data_encoded$Drug, p = 0.8, list = FALSE)
+train_data <- drug_data_encoded[train_indices, ]
+test_data <- drug_data_encoded[-train_indices, ]
+
+# Apply different classification algorithms
+# Logistic Regression
+model_lr <- glm(Drug ~ ., data = train_data, family = "binomial")
+predictions_lr <- predict(model_lr, newdata = test_data, type = "response")
+
+# Random Forest
+model_rf <- randomForest(Drug ~ ., data = train_data)
+predictions_rf <- predict(model_rf, newdata = test_data)
+
+# Support Vector Machine (SVM)
+model_svm <- svm(Drug ~ ., data = train_data)
+predictions_svm <- predict(model_svm, newdata = test_data)
+
+# Evaluate models
+# For example, using accuracy for simplicity
+accuracy_lr <- mean((predictions_lr > 0.5) == (test_data$Drug == "DrugY"))
+accuracy_rf <- sum(predictions_rf == test_data$Drug) / length(test_data$Drug)
+accuracy_svm <- sum(predictions_svm == test_data$Drug) / length(test_data$Drug)
+
+# Display accuracies
+cat("Logistic Regression Accuracy:", accuracy_lr, "\n")
+cat("Random Forest Accuracy:", accuracy_rf, "\n")
+cat("SVM Accuracy:", accuracy_svm, "\n")
+
+#car price
+# Assuming your dataset is named 'car_data'
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(randomForest)
+library(xgboost)
+
+# Load the data
+# Assuming 'car_data.csv' is the file containing your data
+car_data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\cars.csv")
+
+# Display the first few rows of the dataset
+head(car_data)
+
+# Summary statistics
+summary(car_data)
+
+# Explore relationships between variables
+# For example, scatter plot of 'selling_price' vs. 'year'
+ggplot(car_data, aes(x = year, y = selling_price)) +
+  geom_point() +
+  labs(title = "Car Price vs. Year")
+
+# Preprocess the data
+# Handle missing values
+car_data_cleaned <- car_data %>%
+  drop_na()
+
+# Encode categorical variables
+car_data_encoded <- car_data_cleaned %>%
+  mutate(
+    fuel = as.factor(fuel),
+    seller_type = as.factor(seller_type),
+    transmission = as.factor(transmission),
+    owner = as.factor(owner)
+  )
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(car_data_encoded$selling_price, p = 0.8, list = FALSE)
+train_data <- car_data_encoded[train_indices, ]
+test_data <- car_data_encoded[-train_indices, ]
+
+# Select features and target variable
+features <- c("year", "km_driven", "fuel", "seller_type", "transmission", "owner")
+target <- "selling_price"
+
+# Train a regression model (Random Forest as an example)
+model_rf <- randomForest(formula = as.formula(paste(target, "~", paste(features, collapse = "+"))), data = train_data)
+
+# Make predictions on the test set
+predictions_rf <- predict(model_rf, newdata = test_data)
+
+# Evaluate the model (using Mean Absolute Error as an example)
+mae <- mean(abs(predictions_rf - test_data$selling_price))
+cat("Mean Absolute Error:", mae, "\n")
+
+new_data <- data.frame(
+  year = 2007,
+  km_driven = 70000,
+  fuel = "Petrol",
+  seller_type = "Individual",
+  transmission = "Manual",
+  owner = "First Owner"
+)
+
+# Ensure consistent factor levels with the training data
+new_data_encoded <- new_data %>%
+  mutate(
+    fuel = factor(fuel, levels = levels(train_data$fuel)),
+    seller_type = factor(seller_type, levels = levels(train_data$seller_type)),
+    transmission = factor(transmission, levels = levels(train_data$transmission)),
+    owner = factor(owner, levels = levels(train_data$owner))
+  )
+
+# Predict with the new data
+prediction_new_data <- predict(model_rf, newdata = new_data_encoded)
+cat("Predicted Selling Price for New Data:", prediction_new_data, "\n")
+###################################################\
+#fertilizers
+# Assuming your dataset is named 'fertilizer_data'
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+# Load the data
+# Assuming 'fertilizer_data.csv' is the file containing your data
+fertilizer_data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\Fertilizer Prediction.csv")
+
+# Display the first few rows of the dataset
+head(fertilizer_data)
+
+# Summary statistics
+summary(fertilizer_data)
+
+# Explore the distribution of 'Fertilizer Name'
+ggplot(fertilizer_data, aes(x = FertilizerName)) +
+  geom_bar() +
+  labs(title = "Distribution of Fertilizer Names")
+
+# Preprocess the data (if needed)
+# For example, encoding categorical variables
+fertilizer_data_encoded <- fertilizer_data %>%
+  mutate(
+    SoilType = as.factor(SoilType),
+    CropType = as.factor(CropType),
+    FertilizerName = as.factor(FertilizerName)
+  )
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(fertilizer_data_encoded$FertilizerName, p = 0.8, list = FALSE)
+train_data <- fertilizer_data_encoded[train_indices, ]
+test_data <- fertilizer_data_encoded[-train_indices, ]
+
+# Train a decision tree model
+model_tree <- rpart(FertilizerName ~ ., data = train_data, method = "class")
+
+# Visualize the decision tree
+rpart.plot(model_tree, extra = 104, type = 2, tweak = 1.2)
+
+# Make predictions on the test set
+predictions_tree <- predict(model_tree, newdata = test_data, type = "class")
+
+# Evaluate the decision tree model
+conf_matrix_tree <- confusionMatrix(predictions_tree, test_data$FertilizerName)
+accuracy_tree <- conf_matrix_tree$overall["Accuracy"]
+
+cat("Decision Tree Accuracy:", accuracy_tree, "\n")
+######################################################################################
+#US arrest
+# Load necessary libraries
+library(tidyverse)
+library(cluster)
+
+# Load the USArrests dataset
+data("USArrests")
+
+# Display the first few rows of the dataset
+head(USArrests)
+
+# Summary statistics
+summary(USArrests)
+
+# Exploratory Data Analysis (EDA)
+# Scatter plot matrix
+pairs(USArrests, main = "Scatter Plot Matrix of USArrests Data")
+
+# Boxplot for each variable
+par(mfrow = c(2, 2))
+for (i in 1:4) {
+  boxplot(USArrests[, i], main = names(USArrests)[i], col = "lightblue", border = "black")
+}
+
+# K-means clustering
+# Select features for clustering (Murder, Assault, Rape, UrbanPop)
+features <- USArrests[, c("Murder", "Assault", "Rape", "UrbanPop")]
+
+# Standardize the features
+scaled_features <- scale(features)
+
+# Determine the optimal number of clusters using the elbow method
+wss <- numeric(10)
+for (k in 1:10) {
+  kmeans_model <- kmeans(scaled_features, centers = k, nstart = 10)
+  wss[k] <- sum(kmeans_model$withinss)
+}
+
+# Plot the elbow method
+plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Number of Clusters",
+     ylab = "Within-cluster Sum of Squares", main = "Elbow Method")
+
+# Determine the optimal number of clusters (elbow point)
+k_optimal <- which(diff(wss) == max(diff(wss)))
+cat("Optimal Number of Clusters:", k_optimal, "\n")
+
+# Apply K-means clustering with the optimal number of clusters
+kmeans_model <- kmeans(scaled_features, centers = k_optimal, nstart = 10)
+
+# Visualize the clusters using the first two features (Murder and Assault)
+plot(USArrests$Murder, USArrests$Assault, col = kmeans_model$cluster, pch = 19,
+     main = "K-means Clustering of USArrests Data", xlab = "Murder", ylab = "Assault")
+
+# Display the cluster centers on the plot
+points(kmeans_model$centers[, c("Murder", "Assault")], col = 1:k_optimal, pch = 8, cex = 2)
+
+# Evaluate the clustering results
+cat("Cluster Centers:\n", kmeans_model$centers, "\n")
+cat("Cluster Sizes:\n", table(kmeans_model$cluster), "\n")
+###############################################################
+#Corona
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(class)
+library(rpart)
+library(rpart.plot)
+
+# Load the Corona Symptoms dataset
+corona_data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\corona.csv")
+
+# Display the first few rows of the dataset
+head(corona_data)
+
+# Summary statistics
+summary(corona_data)
+
+# Exploratory Data Analysis (EDA)
+# Correlation matrixfever bpain age runnyNose diffBreadth infProb
+correlation_matrix <- cor(corona_data[, c("fever", "bpain", "age", "runnyNose", "diffBreadth", "infProb")])
+print("Correlation Matrix:")
+print(correlation_matrix)
+
+# Scatterplot matrix
+pairs(corona_data[, c("fever", "bpain", "age", "runnyNose", "diffBreadth", "infProb")], main = "Scatterplot Matrix")
+
+# Boxplots for each variable
+par(mfrow = c(3, 2))
+for (i in 1:6) {
+  boxplot(corona_data[, i], main = names(corona_data)[i], col = "lightblue", border = "black")
+}
+
+# KNN (k-Nearest Neighbors)
+# Select features and target variable
+features <- corona_data[, c("fever", "bpain", "age", "runnyNose", "diffBreadth")]
+target <- corona_data$infProb
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(target, p = 0.8, list = FALSE)
+train_data <- corona_data[train_indices, ]
+test_data <- corona_data[-train_indices, ]
+
+# Train KNN model
+knn_model <- knn(train_data[, c("fever", "bpain", "age", "runnyNose", "diffBreadth")], 
+                 test_data[, c("fever", "bpain", "age", "runnyNose", "diffBreadth")], 
+                 train_data$infProb, k = 3)
+
+# Evaluate KNN model
+conf_matrix_knn <- confusionMatrix(knn_model, test_data$infProb)
+accuracy_knn <- conf_matrix_knn$overall["Accuracy"]
+cat("KNN Accuracy:", accuracy_knn, "\n")
+
+# Decision Tree
+# Train Decision Tree model
+dt_model <- rpart(infProb ~ ., data = train_data, method = "class")
+
+# Visualize Decision Tree
+rpart.plot(dt_model, extra = 100, type = 2, tweak = 1.2)
+
+# Make predictions on the test set
+predictions_dt <- predict(dt_model, newdata = test_data, type = "class")
+
+# Evaluate Decision Tree model
+conf_matrix_dt <- confusionMatrix(predictions_dt, test_data$infProb)
+accuracy_dt <- conf_matrix_dt$overall["Accuracy"]
+cat("Decision Tree Accuracy:", accuracy_dt, "\n")
+##################################################################
+#churn
+# Load necessary libraries
+library(tidyverse)
+library(caret)
+library(class)
+library(glmnet)
+
+# Load the Customer Churn Prediction dataset
+customer_data <-read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\churn_prediction.csv")
+# Display Customer_id, churn
+print("Customer_id and Churn:")
+print(customer_data[, c("customer_id", "churn")])
+
+# EDA Analysis with Data Visualization
+# Correlation matrix
+correlation_matrix <- cor(customer_data[, c("vintage", "age", "dependents", "customer_nw_category", "days_since_last_transaction", "current_balance", "previous_month_end_balance", "average_monthly_balance_prevQ", "average_monthly_balance_prevQ2", "current_month_credit", "previous_month_credit", "current_month_debit", "previous_month_debit", "current_month_balance", "previous_month_balance", "churn")])
+print("Correlation Matrix:")
+print(correlation_matrix)
+
+library(class)
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(customer_data$churn, p = 0.8, list = FALSE)
+train_data <- customer_data[train_indices, ]
+test_data <- customer_data[-train_indices, ]
+
+# Select features
+features <- c("previous_month_credit", "current_month_debit", "previous_month_debit", "current_month_balance", "previous_month_balance")
+
+# Train the KNN model
+knn_model <- knn(train_data[, features], test_data[, features], train_data$churn, k = 3)
+
+# Evaluate KNN model
+conf_matrix_knn <- confusionMatrix(knn_model, test_data$churn)
+accuracy_knn <- conf_matrix_knn$overall["Accuracy"]
+cat("KNN Accuracy:", accuracy_knn, "\n")
+# Train logistic regression model
+logreg_model <- glm(churn ~ ., data = train_data, family = "binomial")
+
+# Make predictions on the test set
+probabilities <- predict(logreg_model, newdata = test_data, type = "response")
+predictions_logreg <- ifelse(probabilities > 0.5, 1, 0)
+
+# Print the Logistic Regression predictions
+cat("Logistic Regression Predictions:\n", predictions_logreg, "\n")
+########################################################
+#time series
+# Load necessary libraries
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+
+# Assuming your dataset is named 'stock_data'
+stock_data <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\Microsoft_Stock.csv")
+# Convert Date column to Date type
+stock_data$Date <- as.POSIXct(stock_data$Date, format = "%m/%d/%Y %H:%M:%S")
+
+# Time Series Analysis
+# Plot the closing prices over time
+ggplot(stock_data, aes(x = Date, y = Close)) +
+  geom_line() +
+  labs(title = "Microsoft Stock Closing Prices Over Time",
+       x = "Date",
+       y = "Closing Price")
+
+# Exploratory Data Analysis (EDA)
+# Summary statistics
+summary(stock_data)
+
+# Pair plot
+pairs(stock_data)
+
+# Correlation matrix
+cor(stock_data[, c("Open", "High", "Low", "Close", "Volume")])
+
+# Convert Date column to Date type
+stock_data$Date <- as.POSIXct(stock_data$Date, format = "%m-%d-%Y %H:%M:%S")
+
+# Create a time series object
+stock_ts <- ts(stock_data$Close, start = c(2015, 4, 1), frequency = 1)
+
+# Plot the time series data
+plot(stock_ts, main = "Microsoft Stock Closing Prices Over Time", xlab = "Date", ylab = "Closing Price")
+
+# Decompose the time series into trend, seasonality, and remainder
+stock_decomposed <- decompose(stock_ts)
+
+# Plot the decomposed time series
+plot(stock_decomposed)
+###########################################################
+#Iris
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(cluster)
+
+# Load the Iris dataset
+data(iris)
+iris_df <- iris
+
+# EDA Analysis with Data Visualization
+# Summary statistics
+summary(iris_df)
+
+# Pair plot
+pairs(iris_df[, 1:4], main = "Pair Plot of Iris Dataset")
+
+# Box plots
+iris_df %>%
+  gather(key = "Variable", value = "Value", -Species) %>%
+  ggplot(aes(x = Species, y = Value, fill = Species)) +
+  geom_boxplot() +
+  facet_wrap(~Variable, scales = "free_y") +
+  labs(title = "Box Plots of Iris Variables by Species")
+
+# K-means Clustering
+# Select features
+features <- iris_df[, 1:4]
+
+# Determine the optimal number of clusters using the elbow method
+wss <- sapply(1:10, function(k) kmeans(features, centers = k)$tot.withinss)
+plot(1:10, wss, type = "b", main = "Elbow Method to Determine Clusters",
+     xlab = "Number of Clusters (k)", ylab = "Within Sum of Squares (WSS)")
+
+# Based on the elbow method, let's choose k = 3
+k <- 3
+kmeans_model <- kmeans(features, centers = k)
+
+# Evaluate the k-means algorithm
+cat("Centroids:\n", kmeans_model$centers, "\n")
+cat("Within Sum of Squares (WSS):", kmeans_model$tot.withinss, "\n")
+cat("Clusters:\n", kmeans_model$cluster, "\n")
+
+# Visualize the clusters
+iris_df$Cluster <- as.factor(kmeans_model$cluster)
+ggplot(iris_df, aes(x = Sepal.Length, y = Sepal.Width, color = Cluster)) +
+  geom_point() +
+  labs(title = "K-means Clustering of Iris Dataset",
+       x = "Sepal Length",
+       y = "Sepal Width")
+##################################################
+#PIMA
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(e1071)  # For Naïve Bayes
+library(rpart)  # For Decision Tree
+
+# Load the PIMA diabetes dataset
+pima_df <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\diabetes (1).csv")
+# Exploratory Data Analysis (EDA) with Data Visualization
+# Summary statistics
+summary(pima_df)
+
+# Pair plot
+pairs(pima_df[, 1:8], main = "Pair Plot of PIMA Diabetes Dataset")
+
+# Box plots
+pima_df %>%
+  gather(key = "Variable", value = "Value", -Outcome) %>%
+  ggplot(aes(x = as.factor(Outcome), y = Value, fill = as.factor(Outcome))) +
+  geom_boxplot() +
+  facet_wrap(~Variable, scales = "free_y") +
+  labs(title = "Box Plots of PIMA Diabetes Variables by Outcome")
+
+# Naïve Bayes Algorithm
+naive_bayes_model <- naiveBayes(Outcome ~ ., data = pima_df)
+
+# Decision Tree Algorithm
+decision_tree_model <- rpart(Outcome ~ ., data = pima_df, method = "class")
+
+# Visualize Decision Tree
+plot(decision_tree_model)
+text(decision_tree_model)
+
+# Predictions
+# Let's create a new data point for prediction
+new_data <- data.frame(
+  Pregnancies = 2,
+  Glucose = 120,
+  BloodPressure = 70,
+  SkinThickness = 20,
+  Insulin = 80,
+  BMI = 25,
+  DiabetesPedigreeFunction = 0.3,
+  Age = 25
+)
+
+# Naïve Bayes Prediction
+nb_prediction <- predict(naive_bayes_model, new_data, type = "class")
+cat("Naïve Bayes Prediction:", nb_prediction, "\n")
+
+# Decision Tree Prediction
+dt_prediction <- predict(decision_tree_model, new_data, type = "class")
+cat("Decision Tree Prediction:", dt_prediction, "\n")
+####################################################################3
+#house price pred
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(caret)
+library(randomForest)
+library(gbm)
+
+# Load the house price prediction dataset
+house_df <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\Housing_Prices.csv")
+# Load necessary libraries
+library(tidyverse)
+
+# Assuming 'house_df' is your dataset
+# Replace 'YourNumericVariable' with the actual target variable name
+
+# Basic EDA
+summary(house_df)
+
+# Correlation matrix
+correlation_matrix <- cor(house_df)
+corrplot(correlation_matrix, method = "number")
+
+# Distribution of the target variable
+hist(house_df$SalePrice, main = "Distribution of Sale Price", xlab = "Sale Price")
+
+# Scatterplot for important variables
+plot(house_df$FlatAreainSqft, house_df$SalePrice, main = "Sale Price vs Flat Area (Sqft)", xlab = "Flat Area (Sqft)", ylab = "Sale Price", col = "blue")
+
+# Boxplot for categorical variables
+boxplot(house_df$NoofBedrooms ~ house_df$WaterfrontView, main = "Bedrooms vs Waterfront View", xlab = "Waterfront View", ylab = "No of Bedrooms", col = "lightblue")
+
+# Regression model
+model_lm <- lm(SalePrice ~ NoofBedrooms + NoofBathrooms + FlatAreainSqft + NoofFloors, data = house_df)
+
+# Model summary
+summary(model_lm)
+
+# Evaluate the model on test data
+# Assuming you have a test dataset named 'test_data'
+predictions <- predict(model_lm, newdata = test_data)
+
+###############################################################
+#qliver data set
+# Naive Bayes model
+library(e1071)
+liver_df <- read.csv("C:\\Users\\SEJAL\\Downloads\\DAtasets-20231225\\indian_liver_patient.csv")
+# Assuming 'liver_df' is your dataset
+# Replace 'Dataset' with the actual target variable name
+model_nb <- naiveBayes(Dataset ~ ., data = liver_df[, c('Age', 'Total_Bilirubin', 'Direct_Bilirubin', 'Alkaline_Phosphotase', 'Alamine_Aminotransferase', 'Aspartate_Aminotransferase', 'Total_Protiens', 'Albumin', 'Albumin_and_Globulin_Ratio', 'Dataset')])
+
+# Predict using the Naive Bayes model
+predictions_nb <- predict(model_nb, newdata = liver_df)
+
+# Evaluate Naive Bayes model
+confusion_matrix_nb <- table(predictions_nb, liver_df$Dataset)
+accuracy_nb <- sum(diag(confusion_matrix_nb)) / sum(confusion_matrix_nb)
+cat("Naive Bayes Accuracy:", accuracy_nb, "\n")
+# KNN model
+library(class)
+
+# Assuming 'liver_df' is your dataset
+# Replace 'Dataset' with the actual target variable name
+model_knn <- knn(train = liver_df[, c('Age', 'Total_Bilirubin')], 
+                 test = liver_df[, c('Age', 'Total_Bilirubin')], 
+                 cl = liver_df$Dataset, k = 5)
+
+# Evaluate KNN model
+confusion_matrix_knn <- table(model_knn, liver_df$Dataset)
+accuracy_knn <- sum(diag(confusion_matrix_knn)) / sum(confusion_matrix_knn)
+cat("KNN Accuracy:", accuracy_knn, "\n")
+#-------------------------chinmai---------set1
+
+#Corona dataset
+# Install and load necessary libraries
+install.packages(c("tidyverse", "class", "rpart"))
+
+# Load libraries
+library(tidyverse)
+library(class)
+library(rpart)
+
+# Read the dataset
+corona_data <- read.csv("C:\\Users\\HP\\Desktop\\R Lab material\\corona.csv")
+
+# Explore the dataset
+summary(corona_data)
+
+# Correlation matrix
+correlation_matrix <- cor(corona_data)
+
+# EDA: Pairplot
+pairs(corona_data)
+
+# EDA: Correlation heatmap
+heatmap(correlation_matrix, annot = TRUE)
+
+# Split the data into features (X) and target variable (y)
+X <- corona_data[, 1:5]  # Features
+y <- corona_data$infProb  # Target variable
+
+# KNN Model
+knn_model <- knn(train = X, test = X, cl = y, k = 3)
+cat("KNN Predictions:\n", knn_model, "\n")
+
+# Confusion Matrix for KNN
+confusion_knn <- table(Actual = y, Predicted = knn_model)
+cat("Confusion Matrix (KNN):\n", confusion_knn, "\n")
+
+# Accuracy for KNN
+accuracy_knn <- sum(diag(confusion_knn)) / sum(confusion_knn)
+cat("Accuracy (KNN):", accuracy_knn, "\n")
+
+# Decision Tree Model
+tree_model <- rpart(infProb ~ ., data = corona_data, method = "class")
+cat("Decision Tree Predictions:\n", predict(tree_model, corona_data, type = "class"), "\n")
+
+# Display Decision Tree Plot (requires 'rpart.plot' package)
+install.packages("rpart.plot")
+library(rpart.plot)
+rpart.plot(tree_model)
+
+# Confusion Matrix for Decision Tree
+confusion_tree <- table(Actual = y, Predicted = predict(tree_model, corona_data, type = "class"))
+cat("Confusion Matrix (Decision Tree):\n", confusion_tree, "\n")
+
+# Accuracy for Decision Tree
+accuracy_tree <- sum(diag(confusion_tree)) / sum(confusion_tree)
+cat("Accuracy (Decision Tree):", accuracy_tree, "\n")
+
+# Get predictions for new data
+new_data <- data.frame(fever = 101.5, bpain = 0, age = 30, runnyNose = 1, diffBreadth = -1)
+knn_prediction <- knn(train = X, test = new_data, cl = y, k = 3)
+tree_prediction <- predict(tree_model, new_data, type = "class")
+
+cat("KNN Prediction for New Data:", knn_prediction, "\n")
+cat("Decision Tree Prediction for New Data:", tree_prediction, "\n")
+
+
+
+#churn dataset
+# Install and load necessary libraries
+install.packages(c("tidyverse", "class", "ROCR"))
+install.packages("ROCR")
+
+# Load libraries
+library(tidyverse)
+library(class)
+library(ROCR)
+
+# Read the dataset
+customer_data <- read.csv("C:\\Users\\HP\\Desktop\\R Lab material\\churn_prediction.csv")
+# Task 1: Display Customer_id, churn
+cat("Task 1: Display Customer_id, churn\n")
+print(customer_data[, c("customer_id", "churn")])
+
+# Task 2: EDA Analysis
+cat("\nTask 2: EDA Analysis\n")
+
+# Summary statistics
+summary(customer_data)
+
+# Data Visualization using ggplot2
+library(ggplot2)
+
+# Example: Histogram for 'age'
+ggplot(customer_data, aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Age",
+       x = "Age",
+       y = "Frequency")
+
+# Example: Boxplot for 'current_balance' by 'churn'
+ggplot(customer_data, aes(x = churn, y = current_balance, fill = as.factor(churn))) +
+  geom_boxplot() +
+  labs(title = "Current Balance by Churn Status",
+       x = "Churn",
+       y = "Current Balance")
+
+# Scatterplot for 'current_month_balance' and 'previous_month_balance'
+ggplot(customer_data, aes(x = current_month_balance, y = previous_month_balance, color = as.factor(churn))) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Scatterplot of Current vs Previous Month Balance",
+       x = "Current Month Balance",
+       y = "Previous Month Balance")
+
+# Bar plot for 'gender' distribution
+ggplot(customer_data, aes(x = gender, fill = as.factor(churn))) +
+  geom_bar(position = "dodge", alpha = 0.8) +
+  labs(title = "Churn Distribution by Gender",
+       x = "Gender",
+       y = "Count")
+
+
+# Task 3: Machine Learning Algorithm - KNN, Logistic Regression
+cat("\nTask 3: Machine Learning Algorithm\n")
+
+# Split the data into features (X) and target variable (y)
+X <- customer_data[, c("vintage", "age", "gender", "dependents", "occupation", "city", "customer_nw_category", "branch_code", "days_since_last_transaction", "current_balance", "previous_month_end_balance", "average_monthly_balance_prevQ", "average_monthly_balance_prevQ2", "current_month_credit", "previous_month_credit", "current_month_debit", "previous_month_debit", "current_month_balance", "previous_month_balance")]
+y <- customer_data$churn
+
+# Logistic Regression Model
+logistic_model <- glm(churn ~ ., data = customer_data, family = binomial)
+logistic_predictions <- round(predict(logistic_model, newdata = customer_data, type = "response"))
+cat("Logistic Regression Predictions:\n", logistic_predictions, "\n")
+
+# Display confusion matrix for Logistic Regression
+confusion_matrix <- table(Actual = y, Predicted = logistic_predictions)
+cat("Confusion Matrix (Logistic Regression):\n", confusion_matrix, "\n")
+
+# Confusion matrix, accuracy, and predictions for KNN
+cat("\nKNN Model Evaluation:\n")
+# KNN Model
+knn_model <- knn(train = X, test = X, cl = y, k = 3)
+# Confusion Matrix for KNN
+confusion_matrix_knn <- table(Actual = y, Predicted = knn_model)
+print("Confusion Matrix for KNN:")
+print(confusion_matrix_knn)
+# Accuracy for KNN
+accuracy_knn <- sum(diag(confusion_matrix_knn)) / sum(confusion_matrix_knn)
+print(paste("Accuracy for KNN: ", accuracy_knn))
+
+# Confusion matrix, accuracy, and predictions for Logistic Regression
+cat("\nLogistic Regression Model Evaluation:\n")
+confusion_matrix_logistic <- table(Actual = y, Predicted = logistic_predictions)
+accuracy_logistic <- sum(diag(confusion_matrix_logistic)) / sum(confusion_matrix_logistic)
+cat("Confusion Matrix (Logistic Regression):\n", confusion_matrix_logistic, "\n")
+cat("Accuracy (Logistic Regression): ", accuracy_logistic, "\n")
+
+
+
+
+#iris dataset
+# Load necessary libraries
+library(ggplot2)
+library(class)
+library(rpart)
+library(caret)
+
+# Load Iris dataset
+data(iris)
+
+# Display the structure of the Iris dataset
+str(iris)
+
+# Display summary statistics
+summary(iris)
+
+# EDA Analysis
+# Histogram for Sepal Length
+ggplot(iris, aes(x = Sepal.Length)) +
+  geom_histogram(binwidth = 0.1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Sepal Length",
+       x = "Sepal Length",
+       y = "Frequency")
+
+# Point plot for Sepal Length and Sepal Width
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() +
+  labs(title = "Scatterplot of Sepal Length vs Sepal Width",
+       x = "Sepal Length",
+       y = "Sepal Width")
+
+# Bar plot for Species distribution
+ggplot(iris, aes(x = Species, fill = Species)) +
+  geom_bar() +
+  labs(title = "Distribution of Iris Species",
+       x = "Species",
+       y = "Count")
+
+# Split the dataset into features (X) and target variable (y)
+X <- iris[, 1:4]
+y <- iris$Species
+
+# Split the data into training and testing sets
+set.seed(123)
+# Generate random indices for training set (70% of data)
+train_indices <- sample(1:nrow(iris), 0.7 * nrow(iris))
+train_data <- iris[train_indices, ]
+test_data <- iris[-train_indices, ]
+
+# Apply KNN Model
+knn_model <- knn(train = train_data[, 1:4], test = test_data[, 1:4], cl = train_data$Species, k = 3)
+conf_matrix_knn <- table(Actual = test_data$Species, Predicted = knn_model)
+accuracy_knn <- sum(diag(conf_matrix_knn)) / sum(conf_matrix_knn)
+
+# Apply Decision Tree Model
+tree_model <- rpart(Species ~ ., data = train_data, method = "class")
+tree_pred <- predict(tree_model, test_data, type = "class")
+conf_matrix_tree <- table(Actual = test_data$Species, Predicted = tree_pred)
+accuracy_tree <- sum(diag(conf_matrix_tree)) / sum(conf_matrix_tree)
+
+# Display results
+cat("\nKNN Confusion Matrix:\n", conf_matrix_knn, "\n")
+cat("KNN Accuracy:", accuracy_knn, "\n")
+
+cat("\nDecision Tree Confusion Matrix:\n", conf_matrix_tree, "\n")
+cat("Decision Tree Accuracy:", accuracy_tree, "\n")
+
+
+
+#newsurvey data
+# Install and load necessary libraries
+install.packages(c("MASS", "ggplot2", "forecast"))
+install.packages("forecast")
+install.packages("MASS")
+install.packages("ggplot2")
+
+# Load libraries
+library(MASS)
+library(ggplot2)
+library(forecast)
+library(dplyr)
+
+# Load the newsurvey dataset and remove NA values
+data("survey")
+View(survey)
+newsurvey <- na.omit(survey)
+
+# Task 4.1: Plot bar graph for the number of male and female participants
+msum=sum(survey$Sex=="Male",na.rm=TRUE)
+print(msum)
+fsum=sum(survey$Sex=="Female",na.rm = TRUE)
+print(fsum)
+fy=c(fsum,msum)
+name1=c("Female","Male")
+barplot(fy,names.arg = name1,main="Male and Female participants",xlab="Participants",ylab = "frequency",col=c("Red","Blue"))
+
+# Task 4.2: Plot distribution between male left handers and female left handers using bar chart
+sum1=sum(survey$Sex=="Male"  & survey$W.Hnd=="Left",na.rm=TRUE)
+print(sum1)
+sum2=sum(survey$Sex=="Female"  & survey$W.Hnd=="Left",na.rm = TRUE)
+print(sum2)
+ty=c(sum1,sum2)
+name1=c("Male","Female")
+barplot(ty,names.arg = name1,main="Female Left Handers and Male Left Handers ",xlab="Participants",ylab = "count",col=c("Red","Blue"))
+
+# Task 4.3: Reveal the relationship between age and writing hand span using scatter plot
+ggplot(newsurvey, aes(x = Age, y = Wr.Hnd)) +
+  geom_point() +
+  labs(title = "Relationship between Age and Writing Hand Span", x = "Age", y = "Writing Hand Span")
+
+# Task 4.4: Draw boxplot for pulse rate to analyze the five summary statistics
+boxplot(newsurvey$Pulse, main = "Boxplot for Pulse Rate", ylab = "Pulse Rate")
+
+# Load the AirPassengers dataset
+data("AirPassengers")
+
+# Time series analysis on AirPassengers dataset
+passengers_ts <- ts(AirPassengers, frequency = 12)
+autoplot(passengers_ts) + labs(title = "Monthly Air Passengers")
+
+# Fit a time series model and predict the next month's number of passengers
+passengers_model <- auto.arima(passengers_ts)
+passengers_forecast <- forecast(passengers_model, h = 1)
+print(passengers_forecast)
+
+
+
+
+
+#newsurvey data
+# Install and load the dplyr package
+install.packages("dplyr")
+library(dplyr)
+
+# Load the newsurvey data (assuming it is available in the MASS package)
+data("survey")
+newsurvey <- na.omit(survey)
+
+# Task 2: Arrange all male left-handers according to descending order of their heights
+male_left_hander_data <- newsurvey %>%
+  filter(Sex == "Male", W.Hnd == "Left") %>%
+  arrange(desc(Height))
+
+# Display the result
+cat("Task 2: Male left-handers arranged by descending order of heights\n")
+print(male_left_hander_data)
+
+# Task 3: Introduce a new column hand_span
+newsurvey <- newsurvey %>%
+  mutate(hand_span = Wr.Hnd - NW.Hnd)
+
+# Display the dataset with the new column
+cat("\nTask 3: Dataset with the new column 'hand_span'\n")
+print(newsurvey)
+
+# Task 4: Display the average writing span of male and female left-handers
+avg_writing_span <- newsurvey %>%
+  filter(Sex %in% c("Male", "Female"), W.Hnd == "Left") %>%
+  group_by(Sex) %>%
+  summarise(avg_writing_span = mean(Wr.Hnd, na.rm = TRUE))
+
+# Display the result
+cat("\nTask 4: Average writing span of male and female left-handers\n")
+print(avg_writing_span)
+
+# Task 5: Find the maximum pulse rate of male left and right-handers
+max_pulse_rate <- newsurvey %>%
+  filter(Sex == "Male", W.Hnd %in% c("Left", "Right")) %>%
+  group_by(W.Hnd) %>%
+  summarise(max_pulse_rate = max(Pulse, na.rm = TRUE))
+
+# Display the result
+cat("\nTask 5: Maximum pulse rate of male left and right-handers\n")
+print(max_pulse_rate)
+
+# Task 6: EDA Analysis
+cat("\nTask 6: EDA Analysis\n")
+# You can use various plots and summaries to explore the data
+# Example: summary(newsurvey) or ggplot2 for visualizations
+# Task 6: EDA Analysis
+cat("\nTask 6: EDA Analysis\n")
+
+# Summary statistics
+summary(newsurvey)
+
+# Data Visualization using ggplot2
+library(ggplot2)
+
+# Example: Histogram for 'Height'
+ggplot(newsurvey, aes(x = Height, fill = Sex)) +
+  geom_histogram(binwidth = 5, color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Height by Gender",
+       x = "Height",
+       y = "Frequency")
+
+# Example: Barplot for 'WritingHand'
+ggplot(newsurvey, aes(x = W.Hnd, fill = Sex)) +
+  geom_bar(position = "dodge", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Writing Hand by Gender",
+       x = "Writing Hand",
+       y = "Count")
+
+# Example: Scatter plot for 'Age' and 'HandSpan'
+ggplot(newsurvey, aes(x = Age, y = Wr.Hnd, color = Sex)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Scatter Plot of Age vs HandSpan",
+       x = "Age",
+       y = "HandSpan")
+
+
+
+
+
+
+#PIMA 
+# Install and load necessary libraries
+install.packages(c("tidyverse", "caret"))
+
+# Load libraries
+library(tidyverse)
+library(caret)
+# Install and load the necessary library
+install.packages("datasets")
+library(datasets)
+
+# Load the PIMA diabetes dataset
+data("Pima.te")
+diabetes_data <- Pima.te
+
+# Load the PIMA diabetes dataset
+data("PimaIndiansDiabetes")
+diabetes_data <- PimaIndiansDiabetes
+
+# Explore the dataset
+summary(diabetes_data)
+str(diabetes_data)
+
+# Check for missing values
+sum(is.na(diabetes_data))
+
+# Data Visualization using ggplot2
+library(ggplot2)
+
+# Example: Histogram for 'Glucose'
+ggplot(diabetes_data, aes(x = Glucose, fill = as.factor(Outcome))) +
+  geom_histogram(binwidth = 5, color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Glucose by Outcome",
+       x = "Glucose",
+       y = "Frequency")
+
+# Example: Boxplot for 'BMI' by 'Outcome'
+ggplot(diabetes_data, aes(x = as.factor(Outcome), y = BMI, fill = as.factor(Outcome))) +
+  geom_boxplot() +
+  labs(title = "BMI by Diabetes Outcome",
+       x = "Outcome",
+       y = "BMI")
+
+# Split the data into features (X) and target variable (y)
+X <- diabetes_data[, -9]  # Exclude the 'Outcome' column
+y <- diabetes_data$Outcome
+
+# Split the data into training and testing sets
+set.seed(123)
+train_indices <- createDataPartition(y, p = 0.7, list = FALSE)
+train_data <- diabetes_data[train_indices, ]
+test_data <- diabetes_data[-train_indices, ]
+
+# Apply KNN Model
+knn_model <- train(Outcome ~ ., data = train_data, method = "knn", trControl = trainControl(method = "cv"))
+knn_predictions <- predict(knn_model, newdata = test_data)
+confusion_matrix_knn <- confusionMatrix(knn_predictions, test_data$Outcome)
+accuracy_knn <- confusion_matrix_knn$overall["Accuracy"]
+
+# Apply Logistic Regression Model
+logreg_model <- glm(Outcome ~ ., data = train_data, family = binomial)
+logreg_predictions <- predict(logreg_model, newdata = test_data, type = "response")
+logreg_predictions <- ifelse(logreg_predictions > 0.5, 1, 0)
+confusion_matrix_logreg <- confusionMatrix(logreg_predictions, test_data$Outcome)
+accuracy_logreg <- confusion_matrix_logreg$overall["Accuracy"]
+
+# Display results
+cat("KNN Accuracy:", accuracy_knn, "\n")
+cat("Logistic Regression Accuracy:", accuracy_logreg, "\n")
+
+# Display more results and plots as needed
+
+
+
+
+
+#cars.csv
+# Install and load necessary libraries
+install.packages(c("tidyverse", "caret", "rpart", "rpart.plot"))
+
+# Load libraries
+library(tidyverse)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+# Read the dataset
+cars_data <- read.csv("C:\\Users\\HP\\Desktop\\R Lab material\\cars.csv")
+# Display summary statistics
+summary(cars_data)
+
+# EDA Analysis
+
+# Scatter plot of selling price vs. km driven
+plot(cars_data$km_driven, cars_data$selling_price, 
+     xlab = "Kilometers Driven", ylab = "Selling Price",
+     main = "Scatter plot of Selling Price vs. Kilometers Driven")
+
+# Bar plot for fuel type distribution
+barplot(table(cars_data$fuel), 
+        main = "Fuel Type Distribution", 
+        xlab = "Fuel Type", ylab = "Frequency", 
+        col = "skyblue", names.arg = levels(cars_data$fuel))
+
+# Decision Tree Model
+tree_model <- rpart(selling_price ~ ., data = cars_data)
+cat("Decision Tree Predictions:\n", predict(tree_model, cars_data), "\n")
+
+# Display Decision Tree Plot
+rpart.plot(tree_model)
+
+# Linear Regression Model
+linear_model <- lm(selling_price ~ ., data = cars_data)
+cat("Linear Regression Predictions:\n", predict(linear_model, cars_data), "\n")
+
+# Evaluate the models (you can use different metrics as needed)
+tree_predictions <- predict(tree_model, cars_data)
+linear_predictions <- predict(linear_model, cars_data)
+
+# Display actual vs predicted values
+data.frame(Actual = cars_data$selling_price, 
+           Linear_Predicted = linear_predictions,
+           Tree_Predicted = tree_predictions)
+
+#extra sample codes machine learning -------------------------------------------------------------
+# Create the dataset.....Linear Regression
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "FinalGrade" = c(90, 85, 88, 92, 89)
+)
+# Fit a linear model
+linear_model <- lm(FinalGrade ~ MidtermGrade, data = grades_data)
+# View the summary of the linear model
+summary(linear_model)
+# Plot the data points
+plot(grades_data$MidtermGrade, grades_data$FinalGrade, main = "Scatter Plot with Regression Line", xlab = "Midterm Grade", ylab = "Final Grade")
+# Add the regression line
+abline(linear_model, col = "red")
+
+#Multiple Regression
+# Extend the dataset
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "HoursStudied" = c(10, 8, 12, 9, 11),
+  "FinalGrade" = c(90, 85, 88, 92, 89)
+)
+# Fit a multiple regression model
+multiple_model <- lm(FinalGrade ~ MidtermGrade + HoursStudied, data = grades_data)
+# View the summary of the multiple regression model
+summary(multiple_model)
+# Install and load the 'scatterplot3d' package
+install.packages("scatterplot3d")
+library(scatterplot3d)
+
+# Create a 3D scatter plot with a regression plane
+scatterplot3d(grades_data$MidtermGrade, grades_data$HoursStudied, grades_data$FinalGrade, main = "3D Scatter Plot with Regression Plane", xlab = "Midterm Grade", ylab = "Hours Studied", zlab = "Final Grade", pch = 16, color = "blue")
+
+#logistic
+# Extend the dataset for logistic regression
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "Pass" = c(1, 0, 1, 1, 1)  # 1 represents pass, 0 represents fail
+)
+# Fit a logistic regression model
+logistic_model <- glm(Pass ~ MidtermGrade, data = grades_data, family = "binomial")
+# View the summary of the logistic regression model
+summary(logistic_model)
+# Create new data for prediction
+new_data <- data.frame("MidtermGrade" = c(80, 75, 90))
+
+# Make predictions
+predictions <- predict(logistic_model, newdata = new_data, type = "response")
+cat("Predictions:\n", predictions, "\n")
+
+########################################################################################
+# Install and load the rpart package
+install.packages("rpart")
+library(rpart)
+
+# Step 1: Prepare Your Data
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "Pass" = c(1, 0, 1, 1, 1)  # 1 represents pass, 0 represents fail
+)
+
+# Step 2: Build the Decision Tree Model
+decision_tree_model <- rpart(Pass ~ MidtermGrade, data = grades_data, method = "class")
+
+# Step 3: Visualize the Decision Tree (Optional)
+# Install and load the rpart.plot package for visualization
+install.packages("rpart.plot")
+library(rpart.plot)
+
+# Plot the decision tree
+rpart.plot(decision_tree_model, main = "Decision Tree for Pass/Fail Prediction")
+
+# Step 4: Make Predictions
+new_data <- data.frame("MidtermGrade" = c(80, 75, 90))
+
+# Make predictions
+predictions <- predict(decision_tree_model, newdata = new_data, type = "class")
+
+# Print predictions
+cat("Predictions:\n", predictions, "\n")
+################################################################################
+
+#knn
+# Install and load the class package
+install.packages("class")
+library(class)
+
+# Step 1: Prepare Your Data
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "Pass" = c(1, 0, 1, 1, 1)  # 1 represents pass, 0 represents fail
+)
+
+# Step 2: Split the Data into Training and Testing Sets
+
+set.seed(123)  # Set seed for reproducibility
+sample_index <- sample(1:nrow(grades_data), 0.7 * nrow(grades_data))  # 70% for training, 30% for testing
+
+train_data <- grades_data[sample_index, ]
+test_data <- grades_data[-sample_index, ]
+
+# Step 3: Build the KNN Model
+k_value <- 3  # Set the number of neighbors
+
+# Use the knn function to train the model
+knn_model <- knn(train = as.matrix(train_data[, "MidtermGrade", drop = FALSE]), 
+                 test = as.matrix(test_data[, "MidtermGrade", drop = FALSE]), 
+                 cl = train_data$Pass, k = k_value)
+
+# Step 4: Evaluate the Model
+confusion_matrix <- table(Actual = test_data$Pass, Predicted = knn_model)
+cat("Confusion Matrix:\n", confusion_matrix, "\n")
+
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("Accuracy:", accuracy, "\n")
+
+# Step 5: Make Predictions for New Data
+new_data <- data.frame("MidtermGrade" = c(80, 75, 90))
+
+# Make predictions
+new_predictions <- knn(train = train_data[, c("MidtermGrade")], test = new_data, cl = train_data$Pass, k = k_value)
+cat("Predictions for New Data:\n", new_predictions, "\n")
+
+####################################################
+#kmeans
+# Step 1: Prepare Your Data
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "FinalGrade" = c(90, 85, 88, 92, 89)
+)
+
+# Step 2: Select Features for Clustering
+features_for_clustering <- grades_data[, c("MidtermGrade", "FinalGrade")]
+
+# Step 3: Perform K-means Clustering
+k_value <- 2  # Set the number of clusters
+
+# Use the kmeans function
+kmeans_model <- kmeans(features_for_clustering, centers = k_value)
+
+# Step 4: Visualize the Clusters (Optional)
+# Install and load the cluster package for visualization
+install.packages("cluster")
+library(cluster)
+
+# Plot the clusters
+clusplot(features_for_clustering, kmeans_model$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+# Step 5: Explore Cluster Results
+# Assign cluster labels to the original dataset
+grades_data$Cluster <- kmeans_model$cluster
+
+# View the resulting clusters
+cat("Cluster Assignment:\n")
+print(grades_data[, c("Name", "Cluster")])
+cat("Cluster Centers:\n", kmeans_model$centers, "\n")
+########################################################
+# Install and load necessary packages
+install.packages("ggplot2")
+install.packages("forecast")
+install.packages("plotly")
+
+library(ggplot2)
+library(forecast)
+library(plotly)
+
+set.seed(123)
+date_sequence <- seq(as.Date("2022-01-01"), as.Date("2022-12-31"), by = "days")
+time_series_data <- data.frame(
+  Date = date_sequence,
+  Value = rnorm(length(date_sequence), mean = 50, sd = 10)
+)
+
+# Plot the time series data using plotly for interactivity
+plot_ly(data = time_series_data, x = ~Date, y = ~Value, type = 'scatter', mode = 'lines') %>%
+  layout(title = "Synthetic Time Series Data", xaxis = list(title = "Date"), yaxis = list(title = "Value"))
+
+# Time series decomposition (trend, seasonality, and remainder)
+time_series_decomposed <- decompose(ts(time_series_data$Value, frequency = 30))  # Use a more suitable frequency
+
+# Plot the decomposed time series components using plotly
+plot_ly() %>%
+  add_trace(x = time_series_data$Date, y = time_series_decomposed$trend, name = 'Trend', type = 'scatter', mode = 'lines') %>%
+  add_trace(x = time_series_data$Date, y = time_series_decomposed$seasonal, name = 'Seasonal', type = 'scatter', mode = 'lines') %>%
+  add_trace(x = time_series_data$Date, y = time_series_decomposed$random, name = 'Remainder', type = 'scatter', mode = 'lines') %>%
+  layout(title = "Time Series Decomposition")# Rest of your code...
+
+########################################################################################
+# Install and load necessary packages
+install.packages("forecast")
+install.packages("ggplot2")
+library(forecast)
+library(ggplot2)
+
+# Generate synthetic time series data
+set.seed(123)
+date_sequence <- seq(as.Date("2022-01-01"), as.Date("2022-12-31"), by = "days")
+time_series_data <- data.frame(
+  Date = date_sequence,
+  Value = rnorm(length(date_sequence), mean = 50, sd = 10)
+)
+
+# Plot the time series data
+ggplot(time_series_data, aes(x = Date, y = Value)) +
+  geom_line() +
+  labs(title = "Synthetic Time Series Data", x = "Date", y = "Value")
+
+# Time series decomposition (trend, seasonality, and remainder)
+time_series_decomposed <- decompose(ts(time_series_data$Value, frequency = 365))
+
+# Plot the decomposed time series components
+autoplot(time_series_decomposed)
+
+# Fit an ARIMA model
+arima_model <- auto.arima(time_series_data$Value)
+summary(arima_model)
+
+# Forecast future values
+forecast_values <- forecast(arima_model, h = 365)
+
+# Plot the forecast
+autoplot(forecast_values)
+###########################################################
+#naive bayes
+# Install and load necessary packages
+install.packages("e1071")
+library(e1071)
+
+# Step 1: Prepare Your Data
+# Assume you have a dataset with features (MidtermGrade) and a binary outcome variable (Pass)
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "FinalGrade" = c(90, 85, 88, 92, 89)
+)
+
+# Create a binary outcome variable (Pass/Fail) based on a threshold (e.g., 85 as a passing grade)
+grades_data$Pass <- ifelse(grades_data$MidtermGrade >= 85, 1, 0)
+
+# Step 2: Split the Data into Training and Testing Sets
+set.seed(123)  # Set seed for reproducibility
+sample_index <- sample(1:nrow(grades_data), 0.7 * nrow(grades_data))  # 70% for training, 30% for testing
+
+train_data <- grades_data[sample_index, ]
+test_data <- grades_data[-sample_index, ]
+
+# Step 3: Build the Naive Bayes Model
+naive_bayes_model <- naiveBayes(Pass ~ MidtermGrade, data = train_data)
+
+# Step 4: Make Predictions on the Test Set
+predictions <- predict(naive_bayes_model, newdata = test_data)
+
+# Step 5: Evaluate the Model
+confusion_matrix <- table(Actual = test_data$Pass, Predicted = predictions)
+cat("Confusion Matrix:\n", confusion_matrix, "\n")
+
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("Accuracy:", accuracy, "\n")
+###################################################################
+
+#random forest
+# Install and load necessary packages
+install.packages("randomForest")
+library(randomForest)
+
+# Step 1: Prepare Your Data
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "FinalGrade" = c(90, 85, 88, 92, 89),
+  "Pass" = c(1, 0, 1, 1, 1)  # 1 represents pass, 0 represents fail
+)
+
+# Step 2: Split the Data into Training and Testing Sets
+set.seed(123)  # Set seed for reproducibility
+sample_index <- sample(1:nrow(grades_data), 0.7 * nrow(grades_data))  # 70% for training, 30% for testing
+
+train_data <- grades_data[sample_index, ]
+test_data <- grades_data[-sample_index, ]
+
+# Step 3: Build the Random Forest Model
+random_forest_model <- randomForest(Pass ~ MidtermGrade + FinalGrade, data = train_data, ntree = 100)
+
+# Step 4: Make Predictions on the Test Set
+predictions <- predict(random_forest_model, newdata = test_data)
+
+# Step 5: Evaluate the Model
+confusion_matrix <- table(Actual = test_data$Pass, Predicted = predictions)
+cat("Confusion Matrix:\n", confusion_matrix, "\n")
+
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("Accuracy:", accuracy, "\n")
+#########################################
+#svm
+# Install and load necessary packages
+install.packages("e1071")
+library(e1071)
+
+# Step 1: Prepare Your Data
+grades_data <- data.frame(
+  "StudentID" = c(1, 2, 3, 4, 5),
+  "Name" = c("Alice", "Bob", "Charlie", "David", "Emily"),
+  "MidtermGrade" = c(85, 78, 92, 88, 95),
+  "FinalGrade" = c(90, 85, 88, 92, 89),
+  "Pass" = c(1, 0, 1, 1, 1)  # 1 represents pass, 0 represents fail
+)
+
+# Step 2: Split the Data into Training and Testing Sets
+set.seed(123)  # Set seed for reproducibility
+sample_index <- sample(1:nrow(grades_data), 0.7 * nrow(grades_data))  # 70% for training, 30% for testing
+
+train_data <- grades_data[sample_index, ]
+test_data <- grades_data[-sample_index, ]
+
+# Step 3: Build the SVM Model
+svm_model <- svm(Pass ~ MidtermGrade + FinalGrade, data = train_data)
+
+# Step 4: Make Predictions on the Test Set
+predictions <- predict(svm_model, newdata = test_data)
+
+# Step 5: Evaluate the Model
+confusion_matrix <- table(Actual = test_data$Pass, Predicted = predictions)
+cat("Confusion Matrix:\n", confusion_matrix, "\n")
+
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("Accuracy:", accuracy, "\n")
+
+#extra code visualization---------------------------------------------------------------------------------
+file=read.csv("C:\\Users\\SEJAL\\Desktop\\R Experiments\\Experiments\\EXp4.csv")
+View(file)
+print(file)
+x=c(1,3,5,7,9)
+y=c(2,4,6,8,10)
+p=c(file$Name)
+q=c(file$Percentage)
+z=c(file$Marks)
+plot(x,y,type="l",col="red",xlab = "Name",ylab = "Percantage",main="BTECH")
+name=c("sejal","chinmai","Sucheta","Mrunal","sonali","dheeraj","leena","sanket","anshul")
+barplot(q,names.arg = p,xlab = "Name",ylab ="Percentage" ,main = "Bar Graph",col="Yellow")
+hist(z,xlab = "Marks",ylab ="Frequency",col = "Red",main="Histogram")
+lables=c(file$Name)
+pie(file$Percentage,lables,main="Pie Chart")
+plot(q,z,col="Red",xlab="Percentage",ylab="Marks",main="Scatter Plot")
+
+
+
+
+
+
+#---------------------------------
+
+
+
+install.packages("dplyr")
+library(dplyr)
+
+install.packages("Mass")
+install.packages("survey")
+library(MASS)
+library(survey)
+View(survey)
+print(survey,na.rm=TRUE)
+
+msum=sum(survey$Sex=="Male",na.rm=TRUE)
+print(msum)
+fsum=sum(survey$Sex=="Female",na.rm = TRUE)
+print(fsum)
+fy=c(fsum,msum)
+name1=c("Female","Male")
+barplot(fy,names.arg = name1,main="Male and Female participants",xlab="Participants",ylab = "frequency",col=c("Red","Blue"))
+
+lsum=sum(survey$W.Hnd=="Left",na.rm=TRUE)
+print(lsum)
+rsum=sum(survey$W.Hnd=="Right",na.rm = TRUE)
+print(rsum)
+sy=c(lsum,rsum)
+name2=c("Left","Right")
+barplot(sy,names.arg = name2,main="Left Handers and Right Handers",xlab="Participants",ylab = "frequency",col=c("Yellow","Green"))
+
+sum1=sum(survey$Sex=="Male"  & survey$W.Hnd=="Left",na.rm=TRUE)
+print(sum1)
+sum2=sum(survey$Sex=="Female"  & survey$W.Hnd=="Left",na.rm = TRUE)
+print(sum2)
+ty=c(sum1,sum2)
+name1=c("Male","Female")
+barplot(ty,names.arg = name1,main="Female Left Handers and Male Left Handers ",xlab="Participants",ylab = "count",col=c("Red","Blue"))
+
+
+data1=sum(survey$Sex=="Male" & survey$W.Hnd=="Left" & survey$Smoke=="Never", na.rm = TRUE)
+data2=sum(survey$Sex=="Male" & survey$W.Hnd=="Left" & survey$Smoke=="Regul", na.rm = TRUE)
+data3=sum(survey$Sex=="Male" & survey$W.Hnd=="Left" & survey$Smoke=="Occas", na.rm = TRUE)
+data4=sum(survey$Sex=="Male" & survey$W.Hnd=="Left" & survey$Smoke=="Heavy", na.rm = TRUE)
+print(data1)
+print(data2)
+print(data3)
+print(data4)
+ay=c(data1,data2,data3,data4)
+name2=c("Never","Regul","Occas","Heavy")
+barplot(ay,names.arg = name2,main="Smoking Habbit of Male Left Handers",xlab="Smoking Habbit",ylab = "count",col=c("Orange","Green","Yellow","Blue"))
+
+
+color=c("Red","Green","Blue","Orange","Pink","Yellow","Brown","violet")
+hist(survey$Age,col=color,xlab = "Age Range",ylab="Frequency",main="Age Distribution")
+
+plot(survey$Age, survey$Wr.Hnd, main = "Age vs. Writing Hand Span", xlab = "Age", ylab = "Writing Hand Span", col = c("blue", "red")[factor(survey$Sex)])
+
+boxplot(survey$Pulse, main = "Pulse Rate Boxplot", ylab = "Pulse Rate")
+
+#--------------------------------------------------------------
+
+####Ques3
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("dplyr")
+library(dplyr)
+
+ggplot(data = survey, aes(x = Sex, fill = Sex)) + geom_bar() + labs(title = "Male and Female Participants") + scale_fill_manual(values = c("Male" = "blue", "Female" = "pink"))
+
+ggplot(data = survey, aes(x = W.Hnd, fill = W.Hnd)) + geom_bar() + labs(title = "Left Handers and Right Handers") +
+  scale_fill_manual(values = c("Left" = "green", "Right" = "orange"))
+
+ggplot(data = survey, aes(x = W.Hnd, fill = Sex)) + geom_bar(position = "dodge") + labs(title = "Female Left Handers and Male Left Handers") + scale_fill_manual(values = c("Male" = "purple", "Female" = "yellow"))
+
+library(dplyr)
+male_left_smokers = survey %>% filter(Sex == "Male", W.Hnd == "Left")
+pie_plots = lapply(unique(male_left_smokers$Smoke), function(Smoke) {
+  data = male_left_smokers %>%
+    filter(Smoke == Smoke) %>%
+    group_by(Age) %>%
+    summarize(count = n())
+  
+  ggplot(data = survey, aes(x = "", y = count, fill = Age)) +
+    geom_bar(stat = "identity") +
+    labs(title = paste("Male Left Handers - Smoking:", Smoke))
+})
+print(pie_plots)
+
+ggplot(data = survey, aes(x = Age)) + geom_histogram(binwidth = 5, fill = "blue", color = "black") + labs(title = "Age Distribution", x = "Age Range", y = "Frequency")
+
+ggplot(data = survey, aes(x = Age, y = Wr.Hnd , color = Sex)) + geom_point() + labs(title = "Age vs. Writing Hand Span", x = "Age", y = "Writing Hand Span")
+
+
+
+    </pre>
+
+</body>
+</html>
